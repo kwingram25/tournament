@@ -1,0 +1,115 @@
+@media only screen and (max-width : 560px), (min-device-width : 320px) and (max-device-width : 640px) {
+
+	body {
+		background: #fff;
+	}
+
+	knockout-game {
+		width: initial;
+	}
+
+	knockout-game .controls, knockout-game .display {
+		display: block;
+		height: initial;
+		padding: 0 2vh;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	knockout-game .controls {
+		background: transparent;
+	}
+
+	knockout-game .controls h1 {
+		font-size:180%;
+		-webkit-margin-after: 0;
+	}
+
+
+	knockout-game .input {
+		display: inline-block;
+		width: 43.5%;
+	}
+
+	knockout-game .input:nth-of-type(1) {
+		margin-right: 10%;
+	}
+
+	knockout-game status-indicator {
+		font-size: 120%;
+	}
+
+	knockout-game progress-bar {
+		list-style-type: none;
+		box-sizing: border-box;
+		text-align: left;
+		width: 100%;
+	}
+
+	knockout-game progress-bar ul {
+		display: block;
+	}
+
+	knockout-game progress-bar li {
+		display: inline-block;
+		width: 2.7em;
+		height:2.7em;
+	}
+
+	
+}
+
+@media only screen and (min-device-width : 640px) and (max-device-width : 1024px) {
+
+
+	knockout-game {
+		font-size: 23px;
+		width: 100%;
+	}
+
+	knockout-game progress-bar ul {
+		display: block;
+	}
+
+	knockout-game progress-bar li {
+		display: inline-block;
+		width: 2.5em;
+		height: 2.5em;
+	}
+}
+
+@media only screen and (min-device-width : 320px) and (max-device-width : 640px) {
+	knockout-game {
+		font-size: 36px;
+	}
+
+	knockout-game .controls h1 {
+		font-size:140%;
+	}
+
+	knockout-game .input {
+		margin-bottom: 4pc;
+	}
+
+	knockout-game status-indicator {
+		font-size: 100%;
+		margin: 2pc 0;
+	}
+
+	knockout-game progress-bar li {
+		display: inline-block;
+		width: 2.2em;
+		height: 2.2em;
+	}
+}
+
+@media (-webkit-min-device-pixel-ratio: 2) and (min-device-width : 320px) and (max-device-width : 736px)  { 
+	knockout-game status-indicator[state="setup"] > div:before,
+	knockout-game status-indicator[state="processing"] > div:before {
+		width:60px;
+		height:60px;
+		top: -4px;
+		background-size: 60px 60px;
+	}
+
+}
