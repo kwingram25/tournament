@@ -1,3 +1,5 @@
+'use strict';
+
 class Round {
 
 	constructor({ view, tournamentId, roundIndex, matchUps, teamsPerMatch, teams={} }) {
@@ -10,45 +12,65 @@ class Round {
 	}
 
 	async process() {
-		/* Update status message with round number; if first round defer until teams fetched */
-		if (this.roundIndex > 0) 
+		try {
+
+			/* Update status message with round number */
 			this.view.statusIndicator.update({
-				state: "processing",
+				state: util.state.processing,
 				message: this.roundIndex + 1
 			});
-		
+			if (this.view.progressBar.hidden)
+				this.view.progressBar.show();
 
-		/* Fetch winners for all matches in this round, update teams dictionary */
-		let matchWinners = await Promise.all(
-			this.matchUps.map( async (matchUp, matchUpIndex) => {
+			/* Break matchUps into segments so no more than 15 teams fetched at once */
 
-				let match = new Match(this, matchUpIndex, matchUp.teamIds);
-				let winner = await match.winner();
+			let matchWinners = [], i = 0;
+			const matchesPerSegment = this.roundIndex === 0 ? Math.max(1, Math.floor(15 / this.teamsPerMatch)-1) : this.matchUps.length;
 
-				this.teams = match.teams;
-				return winner;
+			try {
+				while (i < this.matchUps.length) {
+					let segmentWinners = await Promise.all(
+						this.matchUps.slice(i, i+matchesPerSegment).map( async (matchUp) => {
 
-			})
-		);
+							const match = new Match(this, matchUp);
+							const winner = await match.winner();
 
-		/* If only one match this round, tournament is over - return it */
-		if (matchWinners.length == 1) {
-			this.winner = matchWinners[0];
-			return;
-		}
+							this.teams = match.teams;
+							return winner;
 
-		/* Process winners into matchUps array for next round, pass back to Tournament */
-		let nextRoundMatchUps = [];
-		for (let i = 0; i < matchWinners.length; i += this.teamsPerMatch) {
+						})
+					);
 
-			let matchUp = {
-				match: i / this.teamsPerMatch,
-				teamIds: matchWinners.slice(i, i + this.teamsPerMatch).map(team => team.teamId)
+					matchWinners = matchWinners.concat(segmentWinners);
+
+					i += matchesPerSegment;
+				}
+			} catch(error) {
+				//throw error;
 			}
-			nextRoundMatchUps.push(matchUp);
-		}
 
-		this.nextRoundMatchUps = nextRoundMatchUps;
+			/* If only one match this round, tournament is over - return it */
+			if (matchWinners.length == 1) {
+				this.winner = matchWinners[0];
+				return;
+			}
+
+			/* Process winners into matchUps array for next round, pass back to Tournament */
+			let nextRoundMatchUps = [];
+			for (let i = 0; i < matchWinners.length; i += this.teamsPerMatch) {
+
+				const matchUp = {
+					match: i / this.teamsPerMatch,
+					teamIds: matchWinners.slice(i, i + this.teamsPerMatch).map(team => team.teamId)
+				}
+				nextRoundMatchUps.push(matchUp);
+			}
+
+			this.nextRoundMatchUps = nextRoundMatchUps;
+
+		} catch(error) {
+			throw error;
+		}
 
 	}
 

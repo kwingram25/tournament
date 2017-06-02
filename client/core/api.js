@@ -1,50 +1,48 @@
+'use strict';
+
 class API {
 
 	/* Generate URL component for params */
 	static serialize(params) {
-		var str = "";
-		for (var key in params) {
-		    if (str != "") {
-		        str += "&";
-		    }
-
-		    if (Array.isArray(params[key])) {
-		    	str += params[key].map((val) => `${key}[]=${encodeURIComponent(val)}`).join('&');
+		return Object.keys(params).map(key => {
+			if (Array.isArray(params[key])) {
+		    	return params[key].map((val) => `${key}[]=${encodeURIComponent(val)}`).join('&');
 		    } else {
-				str += `${key}=${encodeURIComponent(params[key])}`;
+				return `${key}=${encodeURIComponent(params[key])}`;
 			}
-		}
-		return str;
+
+		}).join('&');
 	}
 
-	static async request(url, params, opts={}) {
+	static async request(url, params={}, opts={}) {
 
-		let init, method = opts.method || 'GET';
+		let _url = url, init, method = opts.method || 'GET';
 
 		/* Pass parameters in body if POST, URL if GET */
 		switch (method) {
 			case 'POST':
+				_url = url;
 				init = Object.assign({body: this.serialize(params)}, opts);
 				break;
 
 			default:
 				init = opts;
-				url = `${url}?${API.serialize(params)}`;
+				_url = `${url}?${API.serialize(params)}`;
 				break;
 		}
 	
 		try {
-			let res = await fetch(url, init);
-			let json = await res.json();
 
-			if (res.status == 400) {
-				throw new Error(json.message || c.str.unknown_error || "");
+			const res = await fetch(_url, init);
+			const json = await res.json();
+
+			if (!res.ok) {
+				throw new Error(json.message || util.str.msg.unknown_error || "");
 			}
 
-
 			return json;
-		} catch (e) {
-			throw e;
+		} catch (error) {
+			throw error;
 		}
 
 		return false;

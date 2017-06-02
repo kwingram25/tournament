@@ -6,6 +6,21 @@
 // http://sinonjs.org/docs
 
 describe('This test', function() {
+
+  it('creates a progress bar', function() {
+    var bar = new ProgressBar();
+    bar.resize(6).increment(3);
+
+    expect(bar.length).to.equal(6);
+    expect(bar.completed).to.equal(3);
+
+    bar.decrement(2);
+    expect(bar.completed).to.equal(1);
+
+    bar.increment(9);
+    expect(bar.completed).to.equal(6);
+  });
+
   it('passes', function() {
     expect(2 + 2).to.equal(4);
   });

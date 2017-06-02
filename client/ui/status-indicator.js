@@ -5,10 +5,10 @@ class StatusIndicator extends HTMLElement {
 	static get template() {
 		return {
 			hidden: s => "",
-			error: s => c.str.msg.wrap_error.replace(/%s/, s),
-			setup: s => c.str.msg.wrap_setup.replace(/%s/, s),
-			processing: s => c.str.msg.wrap_processing.replace(/%s/, s),
-			success: s => c.str.msg.wrap_winner.replace(/%s/, `<span id="${c.uiids.winner}">${s}</span>`)
+			error: s => util.str.msg.wrap_error.replace(/%s/, s),
+			setup: s => util.str.msg.wrap_setup.replace(/%s/, s),
+			processing: s => util.str.msg.wrap_processing.replace(/%s/, s),
+			success: s => util.str.msg.wrap_winner.replace(/%s/, `<span class="${util.ids.winner}" id="${util.ids.winner}">${s}</span>`)
 		}
 	}
 
@@ -35,20 +35,10 @@ class StatusIndicator extends HTMLElement {
 		return this;
 	}
 
-
-	createdCallback() {
-
-	}
-
 	connectedCallback() {
 
 		this.innerHTML = "";
-		this.state = c.state.hidden;
-	}
-
-	createdCallback() {
-
-
+		this.state = util.state.hidden;
 	}
 
 }

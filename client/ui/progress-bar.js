@@ -13,14 +13,10 @@ class ProgressBar extends HTMLElement {
 
 	get template() {
 		return {
-			wrapper: id => `<ul id="${id}"></ul>`,
-			pending: () => `<li> `,
-			complete: () => `<li class="complete"> ` 
+			wrapper: `<ul id="${util.ids.progress_bar}"></ul>`,
+			pending: `<li>`,
+			completed: `<li class="complete">` 
 		}
-	}
-
-	static get observedAttributes() {
-		return ['length', 'completed'];
 	}
 
 	get length() {
@@ -32,11 +28,11 @@ class ProgressBar extends HTMLElement {
 	}
 
 	get completed() {
-		return parseInt(this.getAttribute('completed'), 10);
+		return Math.min(parseInt(this.getAttribute('completed'), 10), this.length);
 	}
 
 	set completed(completed) {
-		this.setAttribute('completed', completed);
+		this.setAttribute('completed', Math.min(completed, this.length));
 	}
 
 	get hidden() {
@@ -79,12 +75,14 @@ class ProgressBar extends HTMLElement {
 	}
 
 	connectedCallback() {
-		console.log('connected');
-		this.innerHTML = this.template.wrapper(c.uiids.progress_bar);
-		this.$list = this.querySelector(`#${c.uiids.progress_bar}`);
+		this.innerHTML = this.template.wrapper;
 
+		this.$list = this.querySelector(`#${util.ids.progress_bar}`);
 		this.connected = true;
+	}
 
+	static get observedAttributes() {
+		return ['length', 'completed'];
 	}
 
 	attributeChangedCallback(attribute, oldValue, newValue) {
@@ -101,8 +99,8 @@ class ProgressBar extends HTMLElement {
 					this.completed = Math.min(this.completed, newValue);
 					this.connected = true;
 
-					this.$list.innerHTML = this.template.complete().repeat(this.completed) + 
-											this.template.pending().repeat(newValue - this.completed);
+					this.$list.innerHTML = this.template.completed.repeat(this.completed) + 
+											this.template.pending.repeat(newValue - this.completed);
 				}
 			
 				break;
@@ -112,8 +110,8 @@ class ProgressBar extends HTMLElement {
 				const n = Math.min(this.length, parseInt(newValue, 10));
 
 				/* Toggle "complete" class for blocks in range between old and new */
-				[...Array(Math.abs(n - o)).keys()].map(i => 1 + i + Math.min(n, o)).forEach((e, i) => {
-					this.querySelector(`li:nth-child(${e})`).classList.toggle('complete');
+				[...Array(Math.abs(n - o)).keys()].map(i => 1 + i + Math.min(n, o)).forEach((index) => {
+					this.querySelector(`li:nth-child(${index})`).classList.toggle('complete');
 				});
 				break;
 

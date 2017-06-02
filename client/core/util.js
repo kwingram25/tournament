@@ -1,9 +1,10 @@
+'use strict';
 
-class c {
+class util {
 
 	/* Get string dictionary for user language / English */
 	static get str() {
-		return c.strings[navigator.language] || c.strings.en;
+		return util.strings[navigator.language] || util.strings.en;
 	}
 
 	/* App strings */
@@ -20,6 +21,7 @@ class c {
 					generic : "Working",
 					generating_tournament : "Generating tournament",
 					processing_round : "Round %i underway",
+					unknown_error : "Unknown error",
 
 					wrap_winner : "%s is the winner!",
 					wrap_error: "<b>Error!</b> %s",
@@ -31,9 +33,8 @@ class c {
 		}
 	}
 
-
 	/* UI element ID's */
-	static get uiids() {
+	static get ids() {
 		return {
 			controls : "controls",
 			display : "display",

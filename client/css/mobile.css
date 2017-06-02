@@ -1,3 +1,4 @@
+/* Narrow window / devices */
 @media only screen and (max-width : 560px), (min-device-width : 320px) and (max-device-width : 640px) {
 
 	body {
@@ -25,7 +26,6 @@
 		-webkit-margin-after: 0;
 	}
 
-
 	knockout-game .input {
 		display: inline-block;
 		width: 43.5%;
@@ -51,15 +51,13 @@
 	}
 
 	knockout-game progress-bar li {
-		display: inline-block;
 		margin-right: 0.3em;
 		width: 2.7em;
 		height:2.7em;
 	}
-
-	
 }
 
+/* Tablets */
 @media only screen and (min-device-width : 640px) and (max-device-width : 1024px) {
 
 	knockout-game {
@@ -72,13 +70,13 @@
 	}
 
 	knockout-game progress-bar li {
-		display: inline-block;
 		margin-right: 0.3em;
-		width: 2.5em;
-		height: 2.5em;
+		width: 2em;
+		height: 2em;
 	}
 }
 
+/* Smartphones */
 @media only screen and (min-device-width : 320px) and (max-device-width : 640px) {
 	knockout-game {
 		font-size: 36px;
@@ -98,12 +96,12 @@
 	}
 
 	knockout-game progress-bar li {
-		display: inline-block;
 		width: 2.1em;
 		height: 2.1em;
 	}
 }
 
+/* High DPI / Retina */
 @media (-webkit-min-device-pixel-ratio: 2) and (min-device-width : 320px) and (max-device-width : 736px)  { 
 	knockout-game status-indicator[state="setup"] > div:before,
 	knockout-game status-indicator[state="processing"] > div:before {

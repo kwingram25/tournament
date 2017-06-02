@@ -10,25 +10,35 @@ class KnockoutGameView extends HTMLElement {
 
 		/* Append HTML */
 		const
-			input = (field, min) => `
-				<div class="input">
-					<label for="${c.uiids[field]}">${c.str[field]}</label>
-					<input id="${c.uiids[field]}" min="${min}" type="number" />
-				</div>
-			`,
+			input = (field, attrs) => {
+				const attributes = Object.keys(attrs).map(k => `${k}="${attrs[k]}"`).join(' ');
+				return `
+					<div class="input">
+						<label for="${util.ids[field]}">${util.str[field]}</label>
+						<input id="${util.ids[field]}" ${attributes}/>
+					</div>
+				`
+			},
 			button = (field) => `
-				<button type="submit" id="${c.uiids[field]}">${c.str[field]}</button>
+				<button type="submit" id="${util.ids[field]}">${util.str[field]}</button>
 			`;
 			
 
 		this.innerHTML = `
-			<form id="${c.uiids.controls}" class="${c.uiids.controls}">
-				<h1>${c.str.app_name}</h1>
-				${input("teams_per_match", 2)}
-				${input("number_of_teams", 2)}
+			<form id="${util.ids.controls}" class="${util.ids.controls}">
+				<h1>${util.str.app_name}</h1>
+				${input("teams_per_match", {
+					min: 2,
+					max: 998,
+					type: "number"
+				})}
+				${input("number_of_teams", {
+					min: 2,
+					type: "number"
+				})}
 			    ${button`start_button`}
 			</form>
-			<div id="${c.uiids.display}" class="${c.uiids.display}">
+			<div id="${util.ids.display}" class="${util.ids.display}">
 			</div>
 		`;
 
@@ -38,11 +48,11 @@ class KnockoutGameView extends HTMLElement {
 	}
 
 	get numberOfTeams() {
-		return parseInt(this.querySelector(`#${c.uiids.number_of_teams}`).value, 10);
+		return parseInt(this.querySelector(`#${util.ids.number_of_teams}`).value, 10);
 	}
 
 	get teamsPerMatch() {
-		return parseInt(this.querySelector(`#${c.uiids.teams_per_match}`).value, 10);
+		return parseInt(this.querySelector(`#${util.ids.teams_per_match}`).value, 10);
 	}
 
 	get locked() {
@@ -57,10 +67,10 @@ class KnockoutGameView extends HTMLElement {
 	}
 
 	buildControls() {
-		this.$controls = this.querySelector(`#${c.uiids.controls}`);
-		this.$teamsPerMatch = this.querySelector(`#${c.uiids.teams_per_match}`);
-		this.$numberOfTeams = this.querySelector(`#${c.uiids.number_of_teams}`);
-		this.$startButton = this.querySelector(`#${c.uiids.start_button}`);
+		this.$controls = this.querySelector(`#${util.ids.controls}`);
+		this.$teamsPerMatch = this.querySelector(`#${util.ids.teams_per_match}`);
+		this.$numberOfTeams = this.querySelector(`#${util.ids.number_of_teams}`);
+		this.$startButton = this.querySelector(`#${util.ids.start_button}`);
 
 		this.$controls.addEventListener("submit", (e) => {
 			e.preventDefault();
@@ -72,7 +82,7 @@ class KnockoutGameView extends HTMLElement {
 	}
 
 	buildDisplay() {
-		this.$display = this.querySelector(`#${c.uiids.display}`);
+		this.$display = this.querySelector(`#${util.ids.display}`);
 
 		this.statusIndicator = new StatusIndicator();
 		this.$display.appendChild(this.statusIndicator);
@@ -91,8 +101,8 @@ class KnockoutGameView extends HTMLElement {
 		/* Recycle / update leftover UI elements */
 		if (this.statusIndicator) 
 			this.statusIndicator.update({
-				state: "setup",
-				message: c.str.msg.generating_tournament
+				state: util.state.setup,
+				message: util.str.msg.generating_tournament
 			});
 		
 
@@ -104,21 +114,18 @@ class KnockoutGameView extends HTMLElement {
 		try {
 
 			let tournament = new Tournament( this, this.numberOfTeams, this.teamsPerMatch );
-			
 			await tournament.fetch();
 
 			this.progressBar.resize( tournament.numberOfMatches ).reset();
-			
 			await tournament.getWinner();
-
 
 		}
 		catch ( error ) {
 			/* Catch error during execution, display in status indicator */
 			console.error(error);
 			this.statusIndicator.update({
-				state: "error",
-				message: error.message
+				state: util.state.error,
+				message: error.message || c.str.msg.unknown_error
 			});
 		}
 

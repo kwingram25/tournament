@@ -1,11 +1,13 @@
+'use strict';
+
 class Match {
 
-	constructor({view, teams, tournamentId, roundIndex}, matchIndex, teamIds) {
+	constructor({view, teams, tournamentId, roundIndex}, {match, teamIds}) {
 		this.view = view;					// Master view
 		this.teams = teams;					// Stored team dictionary
 		this.tournamentId = tournamentId;	// Tournament ID
 		this.roundIndex = roundIndex;		// Index of round within tournament
-		this.matchIndex = matchIndex;		// Index of match within round
+		this.matchIndex = match;			// Index of match within round
 		this.teamIds = teamIds;				// Array of teamIds
 	}
 
@@ -19,50 +21,58 @@ class Match {
 
 	async winner() {
 
-		/* Fetch or look up stored teams in this match by ID */
-		let matchTeams = await Promise.all(
-			this.teamIds.map( async(teamId) => {
-				if (teamId in this.teams) {
-					// console.log('found in memory');
-					return Promise.resolve(( ({teamId, score}) => ({teamId, score}) )(this.teams[teamId]));
-				}
+		try {
+			/* Fetch teams in brackets of max 20, add to running dictionary once fetched */
+			let bracketTeams, matchTeams = [], i = 0;
+			const bracketSize = this.roundIndex === 0 ? Math.min(20, this.teamIds.length) : this.teamIds.length;
+			try {
 				
-				let team = await API.getTeam(this.tournamentId, teamId);
-				this.teams[teamId] = team;
-				return (( ({teamId, score}) => ({teamId, score}) ))(team);
-			})
-		);
+				while (i < this.teamIds.length) {
+					bracketTeams = await Promise.all(
+						this.teamIds.slice(i, i+bracketSize).map( async(teamId) => {
+							if (teamId in this.teams) {
+								return Promise.resolve(( ({teamId, score}) => ({teamId, score}) )(this.teams[teamId]));
+							}
+							
+							const team = await API.getTeam(this.tournamentId, teamId);
+							this.teams[teamId] = team;
+							return ( ({teamId, score}) => ({teamId, score}) )(team);
+						})
+					);
+					matchTeams = matchTeams.concat(bracketTeams);
+					i += bracketSize;
+				}
+			} catch (error) {
+				throw error;
+			}
 
 
-		/* Fetch match score */
-		let matchScore = await API.getMatch(this.tournamentId, this.roundIndex, this.matchIndex);
-		let matchTeamScores = matchTeams.map(({score}) => score);
+			let matchScore, matchTeamScores, winningScore;
+			/* Fetch match score */
+			matchScore = await API.getMatch(this.tournamentId, this.roundIndex, this.matchIndex);
+			matchTeamScores = matchTeams.map(({score}) => score);
 
-		/* Fetch match winner */
-		let winningScore = await API.getWinner(this.tournamentId, matchTeamScores, matchScore.score);
-		
-		/* All teams in memory - if first round, update UI to start showing match progress */
-		if (this.roundIndex == 0) {
-			this.view.statusIndicator.update({
-				state: "processing",
-				message: this.roundIndex + 1
+			/* Fetch match winner */
+			winningScore = await API.getWinner(this.tournamentId, matchTeamScores, matchScore.score);
+			
+			/* Add teams with score >= victory condition to array, sort by score/lowest id, return first */
+			let winningTeams = [];
+			matchTeams.forEach((e) => {
+				if (e.score >= winningScore.score)
+					winningTeams.push(e);
 			});
 
-			this.view.progressBar.show();
+			winningTeams.sort(Match.sortByScoreThenId);
+
+			/* Update UI */
+			this.view.progressBar.increment(1);
+
+			if (typeof winningTeams[0] === 'undefined') throw new Error(util.str.unknown_error);
+
+			return winningTeams[0];
+			
+		} catch (error) {
+			throw error;
 		}
-
-		/* Add teams with score >= victory condition to array, sort by score/lowest id, return first */
-		let winningTeams = [];
-		matchTeams.forEach((e, i, a) => {
-			if (e.score >= winningScore.score)
-				winningTeams.push(e);
-		})
-
-		winningTeams.sort(Match.sortByScoreThenId);
-
-		/* Update UI */
-		this.view.progressBar.increment(1);
-
-		return winningTeams[0];
 	}
 }
