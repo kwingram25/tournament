@@ -52,6 +52,7 @@
 
 	knockout-game progress-bar li {
 		display: inline-block;
+		margin-right: 0.3em;
 		width: 2.7em;
 		height:2.7em;
 	}
@@ -60,7 +61,6 @@
 }
 
 @media only screen and (min-device-width : 640px) and (max-device-width : 1024px) {
-
 
 	knockout-game {
 		font-size: 23px;
@@ -73,6 +73,7 @@
 
 	knockout-game progress-bar li {
 		display: inline-block;
+		margin-right: 0.3em;
 		width: 2.5em;
 		height: 2.5em;
 	}
@@ -98,8 +99,8 @@
 
 	knockout-game progress-bar li {
 		display: inline-block;
-		width: 2.2em;
-		height: 2.2em;
+		width: 2.1em;
+		height: 2.1em;
 	}
 }
 

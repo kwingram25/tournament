@@ -1,12 +1,12 @@
 class Match {
 
-	constructor(round, matchIndex, teamIds) {
-		this.view = round.view;						// Master view
-		this.teams = round.teams;					// Stored team dictionary
-		this.tournamentId = round.tournamentId;		// Tournament ID
-		this.roundIndex = round.roundIndex;			// Index of round within tournament
-		this.matchIndex = matchIndex;				// Index of match within round
-		this.teamIds = teamIds;						// Array of teamIds
+	constructor({view, teams, tournamentId, roundIndex}, matchIndex, teamIds) {
+		this.view = view;					// Master view
+		this.teams = teams;					// Stored team dictionary
+		this.tournamentId = tournamentId;	// Tournament ID
+		this.roundIndex = roundIndex;		// Index of round within tournament
+		this.matchIndex = matchIndex;		// Index of match within round
+		this.teamIds = teamIds;				// Array of teamIds
 	}
 
 	static sortByScoreThenId(a, b) {
@@ -41,11 +41,14 @@ class Match {
 		/* Fetch match winner */
 		let winningScore = await API.getWinner(this.tournamentId, matchTeamScores, matchScore.score);
 		
-		/* All teams in memory - if first round, update UI to add match progress */
+		/* All teams in memory - if first round, update UI to start showing match progress */
 		if (this.roundIndex == 0) {
-			this.view.statusIndicator.state = c.state.processing;
-			this.view.statusIndicator.message = this.roundIndex + 1;
-			this.view.progressBar.hidden = false;
+			this.view.statusIndicator.update({
+				state: "processing",
+				message: this.roundIndex + 1
+			});
+
+			this.view.progressBar.show();
 		}
 
 		/* Add teams with score >= victory condition to array, sort by score/lowest id, return first */

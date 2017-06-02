@@ -8,8 +8,12 @@ class StatusIndicator extends HTMLElement {
 			error: s => c.str.msg.wrap_error.replace(/%s/, s),
 			setup: s => c.str.msg.wrap_setup.replace(/%s/, s),
 			processing: s => c.str.msg.wrap_processing.replace(/%s/, s),
-			success: w => c.str.msg.wrap_winner.replace(/%s/, `<span id="${c.uiids.winner}">${w}</span>`)
+			success: s => c.str.msg.wrap_winner.replace(/%s/, `<span id="${c.uiids.winner}">${s}</span>`)
 		}
+	}
+
+	constructor() {
+		super();
 	}
 
 	get state() {
@@ -24,9 +28,13 @@ class StatusIndicator extends HTMLElement {
 		this.innerHTML = `<div>${StatusIndicator.template[this.state](message)}</div>`;
 	}
 
-	constructor() {
-		super();
+	update({ state = this.state, message = this.message }) {
+
+		this.state = state;
+		this.message = message;
+		return this;
 	}
+
 
 	createdCallback() {
 

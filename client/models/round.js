@@ -1,22 +1,22 @@
 class Round {
 
-	constructor( tournament ) {
-		this.view = tournament.view;						// Master view
-		this.tournamentId = tournament.tournamentId;		// Tournament ID
-		this.teams = tournament.teams || {};				// Stored team dictionary
-		this.roundIndex = tournament.roundIndex;			// Index of round within tournament
-		this.matchUps = tournament.matchUps;				// Matches for this round
-		this.teamsPerMatch = tournament.teamsPerMatch;		// Teams per match
+	constructor({ view, tournamentId, roundIndex, matchUps, teamsPerMatch, teams={} }) {
+		this.view = view;						// Master view
+		this.tournamentId = tournamentId;		// Tournament ID
+		this.teams = teams;						// Stored team dictionary
+		this.roundIndex = roundIndex;			// Index of round within tournament
+		this.matchUps = matchUps;				// Matches for this round
+		this.teamsPerMatch = teamsPerMatch;		// Teams per match
 	}
 
 	async process() {
-		var self = this;
-
 		/* Update status message with round number; if first round defer until teams fetched */
-		if (this.roundIndex > 0) {
-			this.view.statusIndicator.state = c.state.processing;
-			this.view.statusIndicator.message = this.roundIndex + 1;
-		}
+		if (this.roundIndex > 0) 
+			this.view.statusIndicator.update({
+				state: "processing",
+				message: this.roundIndex + 1
+			});
+		
 
 		/* Fetch winners for all matches in this round, update teams dictionary */
 		let matchWinners = await Promise.all(
@@ -30,8 +30,6 @@ class Round {
 
 			})
 		);
-
-		// console.log(matchWinners);
 
 		/* If only one match this round, tournament is over - return it */
 		if (matchWinners.length == 1) {

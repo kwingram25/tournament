@@ -1,21 +1,15 @@
 
 class c {
 
-	static get key() {
-		return {
-			enter : 13,
-			tab : 9
-		}
-	}
-
+	/* Get string dictionary for user language / English */
 	static get str() {
 		return c.strings[navigator.language] || c.strings.en;
 	}
 
-
+	/* App strings */
 	static get strings() {
 		return {
-			en: {
+			"en-US" : {
 				app_name : "Knockout Tournament",
 				teams_per_match : "Teams per match",
 				number_of_teams : "Number of teams",
@@ -38,6 +32,7 @@ class c {
 	}
 
 
+	/* UI element ID's */
 	static get uiids() {
 		return {
 			controls : "controls",
@@ -52,6 +47,7 @@ class c {
 		}
 	}
 
+	/* Tournament states */
 	static get state() {
 		return {
 			hidden: "hidden",

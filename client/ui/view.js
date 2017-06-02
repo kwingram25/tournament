@@ -62,20 +62,6 @@ class KnockoutGameView extends HTMLElement {
 		this.$numberOfTeams = this.querySelector(`#${c.uiids.number_of_teams}`);
 		this.$startButton = this.querySelector(`#${c.uiids.start_button}`);
 
-
-		const didClickNumberInput = (e) => {
-			setTimeout(e.target.select(), 0);
-		};
-
-		const didEditNumberInput = (e) => {
-			let newValue = e.target.value;
-			e.target.setAttribute("value", newValue);
-		};
-
-		[this.$teamsPerMatch, this.$numberOfTeams].forEach((o) => {
-			o.addEventListener("click", didClickNumberInput);
-		});
-
 		this.$controls.addEventListener("submit", (e) => {
 			e.preventDefault();
 
@@ -90,6 +76,10 @@ class KnockoutGameView extends HTMLElement {
 
 		this.statusIndicator = new StatusIndicator();
 		this.$display.appendChild(this.statusIndicator);
+
+		this.progressBar = new ProgressBar();
+		this.$display.appendChild( this.progressBar );
+
 	}
 
 
@@ -99,14 +89,16 @@ class KnockoutGameView extends HTMLElement {
 		this.locked = true;
 
 		/* Recycle / update leftover UI elements */
-		if (this.progressBar) {
-			this.progressBar.remove();
-		}
+		if (this.statusIndicator) 
+			this.statusIndicator.update({
+				state: "setup",
+				message: c.str.msg.generating_tournament
+			});
+		
 
-		if (this.statusIndicator) {
-			this.statusIndicator.state = c.state.setup;
-			this.statusIndicator.message = c.str.msg.generating_tournament;
-		}
+		if (this.progressBar) 
+			this.progressBar.reset().resize(0).hide();
+		
 
 		/* Create and append progress bar, begin tournament run */
 		try {
@@ -114,10 +106,9 @@ class KnockoutGameView extends HTMLElement {
 			let tournament = new Tournament( this, this.numberOfTeams, this.teamsPerMatch );
 			
 			await tournament.fetch();
-			
-			this.progressBar = new ProgressBar( tournament.numberOfRounds, tournament.teamsPerMatch );
-			this.$display.appendChild( this.progressBar );
 
+			this.progressBar.resize( tournament.numberOfMatches ).reset();
+			
 			await tournament.getWinner();
 
 
@@ -125,8 +116,10 @@ class KnockoutGameView extends HTMLElement {
 		catch ( error ) {
 			/* Catch error during execution, display in status indicator */
 			console.error(error);
-			this.statusIndicator.state = c.state.error;
-			this.statusIndicator.message = error.message;
+			this.statusIndicator.update({
+				state: "error",
+				message: error.message
+			});
 		}
 
 		this.locked = false;

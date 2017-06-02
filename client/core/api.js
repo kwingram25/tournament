@@ -1,5 +1,6 @@
 class API {
 
+	/* Generate URL component for params */
 	static serialize(params) {
 		var str = "";
 		for (var key in params) {
@@ -20,6 +21,7 @@ class API {
 
 		let init, method = opts.method || 'GET';
 
+		/* Pass parameters in body if POST, URL if GET */
 		switch (method) {
 			case 'POST':
 				init = Object.assign({body: this.serialize(params)}, opts);
@@ -48,7 +50,7 @@ class API {
 		return false;
 	}
 
-	
+	/* POST /tournament */
 	static newTournament(numberOfTeams, teamsPerMatch) {
 		let params = {
 			numberOfTeams: numberOfTeams,
@@ -64,6 +66,7 @@ class API {
 		return this.request('/tournament', params, opts);
 	}
 
+	/* GET /team */
 	static getTeam(tournamentId, teamId) {
 		let params = {
 			tournamentId: tournamentId,
@@ -72,6 +75,7 @@ class API {
 		return this.request('/team', params);
 	}
 
+	/* GET /match */
 	static getMatch(tournamentId, round, match) {
 		let params = {
 			tournamentId: tournamentId,
@@ -81,6 +85,7 @@ class API {
 		return this.request('/match', params);
 	}
 
+	/* GET /winner */
 	static getWinner(tournamentId, teamScores, matchScore) {
 		let params = {
 			tournamentId: tournamentId,
